@@ -1,0 +1,28 @@
+Options -Indexes
+RewriteEngine On
+
+# Tell Apache this app lives at /dual2v2/
+RewriteBase /dual2v2/
+
+# Block direct access to backend PHP
+RewriteRule ^backend/ - [F,L]
+
+# Vanity profiles: @slug → profile.php
+RewriteRule ^@([a-zA-Z0-9\-]+)/?$ profile.php?slug=$1 [L,QSA]
+
+# Pass real files and folders through as-is; everything else → SPA
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
+
+# Security headers
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# Deny direct access to config
+<FilesMatch "^config\.php$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
